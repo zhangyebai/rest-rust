@@ -32,10 +32,10 @@ pub struct MultiMySqlPool {
 pub fn find_db_config(active: &str) -> MysqlConfig {
     match active {
         "dev" | "test" => MysqlConfig {
-            host: "106.75.245.46".to_string(),
+            host: "0.0.0.0".to_string(),
             port: 3306,
             user_name: "root".to_string(),
-            password: "1292511ys5".to_string(),
+            password: "******".to_string(),
             db: "region".to_string(),
             max_size: 10,
             connect_timeout: Duration::from_secs(5),
@@ -44,10 +44,10 @@ pub fn find_db_config(active: &str) -> MysqlConfig {
             idle_timeout: Some(Duration::from_secs(3)),
         },
         "master" => MysqlConfig {
-            host: "106.75.245.46".to_string(),
+            host: "0.0.0.0".to_string(),
             port: 3306,
             user_name: "root".to_string(),
-            password: "1292511ys5".to_string(),
+            password: "******".to_string(),
             db: "region".to_string(),
             max_size: 10,
             connect_timeout: Duration::from_secs(5),
