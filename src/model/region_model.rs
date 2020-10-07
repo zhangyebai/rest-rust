@@ -1,10 +1,8 @@
 use serde::{Serialize, Deserialize};
 use rbatis::crud::CRUDEnable;
 
-#[macro_use]
-extern crate rbatis_macro_driver;
-
-#[derive(CRUDEnable, Serialize, Deserialize, Clone, Debug)]
+/*CRUDEnable,*/
+#[derive( Serialize, Deserialize, Clone, Debug)]
 pub struct ProvinceEntity {
     pub id: u64,
     pub province_id: String,

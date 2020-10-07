@@ -3,6 +3,13 @@ use std::time::Duration;
 use log::info;
 use rbatis_core::db::PoolOptions;
 use rbatis::rbatis::Rbatis;
+use lazy_static;
+
+
+lazy_static! {
+  // Rbatis是线程、协程安全的，运行时的方法是Send+Sync，内部使用DashMap等等并发安全的map实现，无需担心线程竞争
+  pub static ref REGION_RB: Rbatis=Rbatis::new();
+}
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct MysqlConfig {
@@ -22,11 +29,13 @@ pub struct MysqlConfig {
     pub idle_timeout: Option<Duration>, // 空闲连接的生命周期
 }
 
+
+
 #[derive(Clone)]
 //#[derive(Serialize, Deserialize, Debug)]
 pub struct MultiMySqlPool {
     //pub region_pool: Pool<MySqlConnection>,
-    pub region_pool: Rbatis,
+    //pub region_pool: Rbatis,
 }
 
 pub fn find_db_config(active: &str) -> MysqlConfig {
@@ -70,10 +79,10 @@ pub async fn db_pool(config: &MysqlConfig) -> MultiMySqlPool {
     opt.min_size = config.min_size;
     opt.max_size = config.max_size;
     opt.connect_timeout = config.connect_timeout;
-    let pool = Rbatis::new();
-    pool.link_opt(build_mysql_url(config).as_str(), &opt).await.unwrap();
+    //let mut pool = Rbatis::new();
+    (*REGION_RB).link_opt(build_mysql_url(config).as_str(), &opt).await.unwrap();
     MultiMySqlPool {
-        region_pool: pool,
+        //region_pool: pool,
     }
     /*
     let mut conn = format!("mysql://{}:{}@{}:{}", config.user_name, config.password, config.host, config.port);

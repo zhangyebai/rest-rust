@@ -98,6 +98,7 @@ pub enum Ex {
     ParseIntError(std::num::ParseIntError),
     Utf8Error(std::str::Utf8Error),
     IoError(std::io::Error),
+    SqlError(rbatis_core::Error),
 }
 
 impl std::error::Error for Ex{
@@ -106,6 +107,7 @@ impl std::error::Error for Ex{
             Ex::IoError(ref e) => Some(e),
             Ex::Utf8Error(ref e) => Some(e),
             Ex::ParseIntError(ref e) => Some(e),
+            Ex::SqlError(ref e) => Some(e),
         }
     }
 }
@@ -116,6 +118,7 @@ impl Display for Ex{
             Ex::IoError(ref e) => e.fmt(f),
             Ex::Utf8Error(ref e) => e.fmt(f),
             Ex::ParseIntError(ref e) => e.fmt(f),
+            Ex::SqlError(ref e) => e.fmt(f),
         }
     }
 }
@@ -149,5 +152,11 @@ impl From<std::io::Error> for Ex {
 impl From<Utf8Error> for Ex {
     fn from(s: std::str::Utf8Error) -> Self {
         Ex::Utf8Error(s)
+    }
+}
+
+impl From<rbatis_core::Error> for Ex {
+    fn from(s: rbatis_core::Error) -> Self {
+        Ex::SqlError(s)
     }
 }

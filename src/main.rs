@@ -12,7 +12,13 @@ use actix_web::{HttpServer, App, middleware, web, guard, http, HttpRequest};
 use actix_http::ResponseBuilder;
 use clap::Arg;
 
+#[macro_use]
 extern crate failure;
+
+#[macro_use]
+extern crate rbatis_macro_driver;
+#[macro_use]
+extern crate lazy_static;
 
 //#[macro_use]
 //extern crate log4rs;
