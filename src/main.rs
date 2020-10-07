@@ -1,14 +1,18 @@
 pub mod util;
 pub mod config;
+pub mod route;
+pub mod model;
 
 use log4rs::append::console::ConsoleAppender;
 use log4rs::encode::pattern::PatternEncoder;
 use log4rs::config::{Logger, Appender, Config, Root};
 use log::LevelFilter;
 use log::{info, error};
-use actix_web::{HttpServer, App, middleware, web, guard, http};
+use actix_web::{HttpServer, App, middleware, web, guard, http, HttpRequest};
 use actix_http::ResponseBuilder;
 use clap::Arg;
+
+extern crate failure;
 
 //#[macro_use]
 //extern crate log4rs;
@@ -49,9 +53,14 @@ async fn main() -> std::io::Result<()> {
     info!("app active config value is : {}", active);
 
     let server_config = config::server_config::find_server_config(active);
+
+    let db_config = config::db_config::find_db_config(active);
+    let multi_pool = config::db_config::db_pool(&db_config).await;
     HttpServer::new(move || {
         App::new()
+            .data(multi_pool.clone())
             .wrap(middleware::Logger::default())
+            .configure(route::route_config)
             .default_service(
                 web::route()
                     .guard(guard::Not(guard::Get()))
@@ -60,7 +69,8 @@ async fn main() -> std::io::Result<()> {
                     .guard(guard::Not(guard::Patch()))
                     .guard(guard::Not(guard::Options()))
                     .guard(guard::Not(guard::Delete()))
-                    .to(|| {
+                    .to(|req: HttpRequest| {
+                        error!("{}-{} 404 not found!",req.method().to_string(), req.uri().path());
                         ResponseBuilder::new(http::StatusCode::OK)
                             .set_header("content-type", "application/json; charset=utf-8")
                             .body("{\"code\":404, \"message\":\"request not found\"}")
