@@ -80,6 +80,21 @@ pub fn blur_phone_suffix(phone: &str) -> String{
     }
 }
 
+pub fn split_file_name(file_name: &str) -> (String, Option<String>){
+    let pos = file_name.rfind(".");
+    match pos{
+        Some(p) => (file_name[0..p].to_string(), Some(file_name[p+1..].to_string())),
+        _ => (file_name.to_string(), None),
+    }
+}
+
+pub fn mix_file_name(file_name: &str, suffix: Option<String>) -> String{
+    match suffix{
+        Some(s) => if s.len() > 0 {file_name.to_string() + "." + s.as_str()} else {file_name.to_string()},
+        _ => file_name.to_string(),
+    }
+}
+
 #[test]
 pub fn random_int_s_test() {
     println!("7 - {}, 6 - {}", random_int_s(7), random_int_s(6))
@@ -106,4 +121,13 @@ pub fn blur_phone_test(){
 
     let phone_suffix = blur_phone_suffix(phone);
     println!("phone_suffix = {}", phone_suffix);
+}
+
+#[test]
+pub fn file_test(){
+    let (name, suffix) = split_file_name("abc.pdf");
+    println!("name=[{}], suffix=[{:?}]", name, suffix);
+
+    println!("file_name = {}", mix_file_name("abc", None));
+    println!("file_name = {}", mix_file_name("abc", Some("pdf".to_string())));
 }

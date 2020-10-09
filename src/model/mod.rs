@@ -1,4 +1,5 @@
 pub mod region_model;
+pub mod file_model;
 
 use serde::{Serialize, Deserialize};
 use std::fmt::{Display, Formatter};
@@ -8,6 +9,7 @@ use actix_web::error;
 use actix_web::http::StatusCode;
 use actix_http::{Response, ResponseBuilder};
 use actix_web::body::Body;
+use actix_multipart::MultipartError;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct R<T> {
@@ -99,6 +101,7 @@ pub enum Ex {
     Utf8Error(std::str::Utf8Error),
     IoError(std::io::Error),
     SqlError(rbatis_core::Error),
+    FileError(MultipartError),
 }
 
 impl std::error::Error for Ex{
@@ -108,6 +111,7 @@ impl std::error::Error for Ex{
             Ex::Utf8Error(ref e) => Some(e),
             Ex::ParseIntError(ref e) => Some(e),
             Ex::SqlError(ref e) => Some(e),
+            Ex::FileError(ref e) => Some(e),
         }
     }
 }
@@ -119,6 +123,7 @@ impl Display for Ex{
             Ex::Utf8Error(ref e) => e.fmt(f),
             Ex::ParseIntError(ref e) => e.fmt(f),
             Ex::SqlError(ref e) => e.fmt(f),
+            Ex::FileError(ref e) => e.fmt(f),
         }
     }
 }
@@ -158,5 +163,11 @@ impl From<Utf8Error> for Ex {
 impl From<rbatis_core::Error> for Ex {
     fn from(s: rbatis_core::Error) -> Self {
         Ex::SqlError(s)
+    }
+}
+
+impl From<MultipartError> for Ex {
+    fn from(s: MultipartError) -> Self {
+        Ex::FileError(s)
     }
 }

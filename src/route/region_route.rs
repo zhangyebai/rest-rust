@@ -1,22 +1,33 @@
-use actix_web::{HttpResponse, web};
+use actix_web::{HttpResponse, web, HttpRequest};
 use crate::model::{Ex, R};
 use crate::config::db_config::{MultiMySqlPool, REGION_RB};
-use crate::model::region_model::{ProvinceEntity, RegionDto};
+use crate::model::region_model::{RegionDto};
+use crate::service::region_service;
 use log::info;
 use rbatis::crud::CRUD;
+use serde::{Serialize, Deserialize};
 
-pub async fn list_simple_province(multi_pool: web::Data<MultiMySqlPool>) -> Result<HttpResponse, Ex> {
-    let rb = &(*REGION_RB);
-    let provinces : Vec<ProvinceEntity> = rb.list_by_wrapper("", rb.new_wrapper().gt("id", 0).order_by(true, &["id"])).await?;
-    /*
-    let mut conn = multi_pool.region_pool.get_conn().await?;
-    let provinces = conn.exec_map("SELECT id, province_id, province_name FROM province ORDER BY id", (), |(id, province_id, province_name)|{
-        ProvinceEntity{
-            id,
-            province_id,
-            province_name,
-        }
-    }).await?;*/
-    let ps: Vec<RegionDto> = provinces.iter().map(|p|{RegionDto::from_province_entity(&p)}).collect();
+#[derive(Serialize, Deserialize, Debug)]
+pub struct RegionQuery{
+    pub pid: String,
+}
+
+pub async fn list_simple_provinces() -> Result<HttpResponse, Ex> {
+    let ps = region_service::list_provinces().await?;
     Ok(HttpResponse::Ok().json(R::ok(Some(ps))))
+}
+
+pub async fn list_simple_cities_by_province_id(query: web::Query<RegionQuery>) -> Result<HttpResponse, Ex>{
+    let cs = region_service::list_cities_by_province_id(query.pid.as_str()).await?;
+    Ok(HttpResponse::Ok().json(R::ok(Some(cs))))
+}
+
+pub async fn list_simple_counties_by_city_id(query: web::Query<RegionQuery>) -> Result<HttpResponse, Ex>{
+    let cs = region_service::list_counties_by_city_id(query.pid.as_str()).await?;
+    Ok(HttpResponse::Ok().json(R::ok(Some(cs))))
+}
+
+pub async fn list_simple_towns_by_county_id(query: web::Query<RegionQuery>)->Result<HttpResponse, Ex>{
+    let ts = region_service::list_towns_by_county_id(query.pid.as_str()).await?;
+    Ok(HttpResponse::Ok().json(R::ok(Some(ts))))
 }

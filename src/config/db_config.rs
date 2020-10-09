@@ -53,7 +53,7 @@ pub fn find_db_config(active: &str) -> MysqlConfig {
             idle_timeout: Some(Duration::from_secs(3)),
         },
         "master" => MysqlConfig {
-            host: "106.75.245.46".to_string(),
+            host: "127.0.0.1".to_string(),
             port: 3306,
             user_name: "root".to_string(),
             password: "1292511ys5".to_string(),
@@ -69,7 +69,7 @@ pub fn find_db_config(active: &str) -> MysqlConfig {
 }
 
 fn build_mysql_url(config: &MysqlConfig) -> String {
-    let mut url = format!("mysql://{}:{}@{}:{}/{}",
+    let url = format!("mysql://{}:{}@{}:{}/{}",
                           config.user_name, config.password, config.host, config.port, config.db);
     url
 }

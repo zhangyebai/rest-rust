@@ -2,27 +2,48 @@ pub mod util;
 pub mod config;
 pub mod route;
 pub mod model;
+pub mod mapper;
+pub mod service;
+pub mod common;
 
 use log4rs::append::console::ConsoleAppender;
 use log4rs::encode::pattern::PatternEncoder;
 use log4rs::config::{Logger, Appender, Config, Root};
 use log::LevelFilter;
 use log::{info, error};
-use actix_web::{HttpServer, App, middleware, web, guard, http, HttpRequest};
+use actix_web::{HttpServer, App, middleware, web, guard, http, HttpRequest, HttpResponse};
 use actix_http::ResponseBuilder;
 use clap::Arg;
+extern crate serde;
 
 #[macro_use]
 extern crate failure;
 
-#[macro_use]
+
+
 extern crate rbatis_macro_driver;
+
 #[macro_use]
 extern crate lazy_static;
 
 //#[macro_use]
 //extern crate log4rs;
 //extern crate log;
+
+
+fn index() -> HttpResponse {
+    let html = r#"<html>
+        <head><title>Upload Test</title></head>
+        <body>
+            <form target="" action="/api/file/simple/file" method="post" enctype="multipart/form-data">
+                <input type="file" multiple name="file"/>
+                <button type="submit">Submit</button>
+            </form>
+        </body>
+    </html>"#;
+
+    HttpResponse::Ok().body(html)
+}
 
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
@@ -67,6 +88,7 @@ async fn main() -> std::io::Result<()> {
             .data(multi_pool.clone())
             .wrap(middleware::Logger::default())
             .configure(route::route_config)
+            .service(web::resource("/").route(web::get().to(index)))
             .default_service(
                 web::route()
                     .guard(guard::Not(guard::Get()))
@@ -82,6 +104,7 @@ async fn main() -> std::io::Result<()> {
                             .body("{\"code\":404, \"message\":\"request not found\"}")
                     })
             )
+
     })
 
         .bind(format!("{}:{}", server_config.host, server_config.port))?
