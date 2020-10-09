@@ -24,15 +24,6 @@ pub fn route_config(config: &mut web::ServiceConfig) {
                     "/simple/towns",
                     web::get().to(route::region_route::list_simple_towns_by_county_id)
                 )
-    /*
-                .route(
-                    "/cases/source/list",
-                    web::get().to(routes::statistics_route::list_case_source_statistics),
-                )
-                .route(
-                    "/cases/sales/list",
-                    web::get().to(routes::statistics_route::list_sales_statistics),
-                )*/
 
         )
 
@@ -45,6 +36,10 @@ pub fn route_config(config: &mut web::ServiceConfig) {
                 .route(
                     "/simple/file",
                     web::post().to(file_route::file_upload)
+                )
+                .route(
+                    "/simple/file/download",
+                    web::get().to(file_route::file_download)
                 )
         );
 }
